@@ -1,246 +1,92 @@
-# Dashboard Porsche Sales 🏁
+# Dashboard de Vendas Porsche
 
-Uma dashboard interativa e publicada em HTML que responde perguntas de negócio sobre 76 vendas de Porsche com filtros dinâmicos e indicadores em tempo real.
+Dashboard interativa em HTML (arquivo único) feita a partir de uma planilha de 100 vendas da Porsche, publicada no GitHub Pages.
 
-**[Acesse a dashboard aqui](https://conceicaofrancisco645-commits.github.io/dashboard-porsche-sales/)**
+**🔗 Dashboard publicada:** https://conceicaofrancisco645-commits.github.io/dashboard-porsche-sales/
 
----
-
-## 📊 Perguntas de Negócio Respondidas
-
-A dashboard foi construída em torno de **3 perguntas de negócio prioritárias**:
-
-### 1️⃣ **Qual estado gera maior receita?**
-- **Gráfico:** Receita por Estado (Top 10)
-- **Por quê:** Identificar geograficamente onde estão os maiores volumes de venda, essencial para planejamento logístico e estratégia comercial regional.
-- **Insight:** Permite decisões sobre alocação de recursos, eventos de marketing e parcerias regionais.
-
-### 2️⃣ **Qual modelo de Porsche é mais vendido?**
-- **Gráfico:** Distribuição de Modelos (Pie Chart)
-- **Por quê:** Entender preferências dos clientes e demanda de cada linha de produto (911, Cayenne, Taycan, etc).
-- **Insight:** Guides product mix decisions, inventory planning e estratégia de marketing por modelo.
-
-### 3️⃣ **Qual é o status de entrega das vendas?**
-- **Gráfico:** Status de Entrega (Bar Chart)
-- **Por quê:** Monitorar saúde operacional da logística e identificar gargalos no processo de entrega.
-- **Insight:** Taxa de entrega (47% geral, pode variar com filtros) é KPI crítico para satisfação do cliente.
+![Dashboard completa](print-dashboard.png)
 
 ---
 
-## 🎨 Visual e Design
+## Perguntas de negócio
 
-**Paleta de Cores Porsche Clássico:**
-- Preto escuro (#1a1a1a) — header e fundo
-- Cinzas variados (#2d2d2d, #666, #333) — contraste e hierarquia
-- Branco (#fff) — texto e destaque
-- Verde escuro (chart) — indicadores de sucesso/entrega
+| # | Pergunta | Como é respondida | Por que escolhi |
+|---|----------|-------------------|-----------------|
+| 1 | **Qual linha de modelo traz mais receita?** | Barras horizontais de receita por linha (911, Cayenne, Macan, Taycan, Panamera, 718), com a líder destacada | Mostra onde está o dinheiro do portfólio e ajuda a decidir em qual linha concentrar estoque e esforço comercial. |
+| 2 | **Como os clientes pagam, e quanto dinheiro passa por cada método?** | Barras de receita por método de pagamento com uma linha de quantidade de vendas sobreposta | O método mais usado nem sempre é o que movimenta mais dinheiro. Isso importa para negociar taxas, financiamento e leasing. |
+| 3 | **Quais estados concentram a receita?** | Top 10 estados por receita, com os 3 maiores destacados | Indica para onde direcionar marketing, logística de entrega e expansão. |
 
-**Tipografia:** Segoe UI / System Font (padrão e confiável)
+Além delas, um gráfico de apoio mostra **quanto da receita já foi entregue**, quanto está em andamento e quanto foi cancelado.
 
-**Layout:**
-- Header com branding Porsche
-- Painel de filtros responsivo (6 filtros)
-- Indicadores de topo (KPIs)
-- 3 gráficos Chart.js interativos
+Cada gráfico tem uma frase-resposta que se recalcula a cada filtro, por exemplo: *"911 lidera com $4.272.700 (33% da receita)"*.
 
----
+### Indicadores de topo
+Receita total · Número de vendas · Ticket médio (com faixa mín–máx) · Receita entregue.
 
-## 🔧 Preparação dos Dados
+### Filtros
+Linha · Modelo · Ano do modelo · Estado · Cidade · Método de pagamento · Situação da entrega. Os filtros são **dependentes**: cada lista só mostra opções que existem no recorte atual. Ao escolher o estado CA, por exemplo, a lista de cidades passa a mostrar só cidades da Califórnia.
 
-**Arquivo base:** `Planilha base Porsche (sanitizada)` — 100 vendas
+### Exemplo de filtro aplicado (Linha = 911)
+![Filtro 911 aplicado](print-filtro-911.png)
 
-**Processo de limpeza:**
-
-1. **Remover colunas cruas** — mantive apenas versões sanitizadas
-2. **Renomear colunas** para nomes mais claros:
-   - `sale_date`, `model`, `year`, `price`, `mileage`
-   - `payment_method`, `city`, `state`, `delivery_status`
-3. **Converter tipos:** year e price para números (não texto)
-4. **Remover INVALID:** 24 registros com `sale_date = "INVALID"` foram excluídos
-5. **Resultado:** 76 vendas válidas, receita total **USD 9.487.000**, ticket médio **USD 124.825**
-
-**Formato final:** JSON embutido no HTML (sem backend necessário)
+Com o filtro, as 23 vendas da linha 911 somam $4,27M (33% da receita total). O ticket médio sobe para cerca de $186 mil, e Wire Transfer é o método dominante.
 
 ---
 
-## 💬 Prompt Que Gerou a Dashboard
+## Tratamento da base antes de ir para a IA
 
-O prompt foi iterativo. Versão final enviada:
+A planilha original traz cada campo em duas versões: o dado **cru** e o **sanitizado**. Antes de montar a dashboard:
 
-```markdown
-Crie uma dashboard em HTML único, autocontido e responsivo.
+1. **Fiquei só com as colunas sanitizadas**: data, modelo, ano, preço, quilometragem, pagamento, cidade, estado e status de entrega.
+2. **Converti preço e ano em número.** No cru vinham valores como `$121k`, `USD 112.750`, `68.900 dollars` e `twenty twenty four`; na versão final são números puros.
+3. **Removi dados pessoais.** `customer_name` (nome do cliente) e `salesperson` (vendedor) **não entram** no HTML, porque a base fica embutida na página pública.
+4. **Datas inválidas** (24 registros, como `2024-02-30` e `April 31st`) ficaram marcadas como `INVALID` na sanitização. Elas aparecem como "inválida" na tabela, mas **a venda continua contando** nos indicadores, já que preço, modelo e local são válidos.
+5. **Criei a coluna derivada "Linha"** a partir do modelo (ex.: `911 Turbo S` → `911`), para a pergunta 1 não se perder em 40 modelos diferentes.
+6. **Agrupei o status de entrega** (10 valores) em 3 situações: *Entregue*, *Em andamento* (Pending, In Transit, Shipped, Awaiting…) e *Cancelado*.
 
-DADOS: 76 vendas de Porsche com campos: sale_date, model, year, price, 
-mileage, payment_method, city, state, delivery_status
-
-PERGUNTAS DE NEGÓCIO:
-1. Qual estado gera maior receita? (gráfico top 10 horizontal)
-2. Qual modelo é mais vendido? (pie chart)
-3. Qual status de entrega predomina? (bar chart)
-
-FILTROS (todos AND logic):
-- Estado (todos vs específico)
-- Modelo (todos vs específico)
-- Ano (todos vs específico)
-- Método de Pagamento (todos vs específico)
-- Status de Entrega (todos vs específico)
-- Faixa de Preço: Até 50k, 50-100k, 100-150k, Acima de 150k
-
-INDICADORES DE TOPO:
-- Total de Vendas (quantidade)
-- Receita Total (USD)
-- Ticket Médio (USD)
-- Taxa de Entrega (% de Delivered)
-
-DESIGN:
-- Paleta: Preto/cinzas Porsche clássico
-- Tipografia: Segoe UI / system font
-- Responsivo: mobile-first
-- Sem framework — HTML/CSS/JS puro ou Chart.js via CDN
-```
-
-**Mudanças iterativas:**
-- ✅ Inicial: Incluía 5 perguntas → Reduzido para 3 prioritárias
-- ✅ Adicional: "Taxa de Entrega" como 4º indicador (KPI importante)
-- ✅ Refinamento: Faixa de Preço em vez de slider (melhor UX)
-- ✅ Validação: Testado com filtro CA → confirma lógica funciona
+A base tratada está em [`porsche_sanitizada.csv`](porsche_sanitizada.csv).
 
 ---
 
-## 🛠️ Tecnologias Usadas
+## Ferramenta usada
 
-- **HTML5:** Markup semântico
-- **CSS3:** Grid/Flexbox, media queries para responsividade
-- **JavaScript (Vanilla):** Lógica de filtros, cálculos de KPIs
-- **Chart.js v3.9.1:** Gráficos dinamicamente destruíveis/reconstruíveis (via CDN)
-- **Dados:** JSON embutido (76 vendas sanitizadas)
-- **Publicação:** GitHub Pages
+Usei um **agente de IA com skill de dashboard** (Claude), em vez do ChatGPT com Canvas. O agente leu a planilha, tratou a base, gerou o HTML, testou a página num navegador headless (com um print aplicando filtro) e publicou no GitHub.
 
-**Sem backend necessário** — tudo funciona client-side.
+## O prompt
+
+Prompt-base:
+
+> Crie uma dashboard em HTML, arquivo único, com Chart.js, a partir desta planilha de 100 vendas da Porsche. Use só as colunas sanitizadas e não inclua nome de cliente nem de vendedor.
+> Responda três perguntas de negócio, cada uma com um gráfico e uma frase de resposta que se atualize com os filtros:
+> 1. Qual linha de modelo traz mais receita?
+> 2. Como os clientes pagam, e quanto dinheiro passa por cada método?
+> 3. Quais estados concentram a receita?
+> Inclua KPIs no topo (receita total, vendas, ticket médio, receita entregue) e filtros por linha, modelo, ano, estado, cidade, pagamento e situação da entrega.
+> Visual: fundo escuro, vermelho como cor de destaque e dourado como secundária, fonte Inter.
+
+### O que mudou até a versão final
+- **Pergunta 2:** a primeira versão mostrava só a quantidade de vendas por método. Acrescentei a receita (barras) e deixei a quantidade como linha, porque o método mais frequente e o que movimenta mais dinheiro podem ser diferentes.
+- **Filtros dependentes:** pedi que cada lista mostrasse apenas opções válidas no recorte, para evitar combinações vazias.
+- **Frases-resposta dinâmicas:** além do gráfico, cada pergunta ganhou uma frase com o número-chave, para quem não quer ler o gráfico.
+- **Gráfico de apoio de entrega e tabela de detalhe**, para permitir conferir os números venda a venda.
+- **Estado vazio:** se nenhuma venda bate com os filtros, a página avisa em vez de quebrar.
 
 ---
 
-## 📁 Estrutura de Arquivos
+## Estrutura do repositório
 
 ```
-dashboard-porsche-sales/
-├── index.html                    # Dashboard principal (HTML único, 32 KB)
-├── porsche_sales.json           # Dados sanitizados (reference, embutido em index.html)
-├── README.md                     # Este arquivo
-├── PLANEJAMENTO.md              # Análise inicial e opções de perguntas
-└── PROMPT_DETALHADO.md          # Prompt enviado e iterações
+index.html               # dashboard (dados embutidos, Chart.js via CDN)
+porsche_sanitizada.csv   # base tratada usada na dashboard
+print-dashboard.png      # print da dashboard completa
+print-filtro-911.png     # print com filtro aplicado
+README.md
 ```
 
-**Em produção (GitHub Pages):**
-- Apenas `index.html` é necessário na raiz
-- Arquivos `.json` e `.md` opcionais (para transparência e referência)
+## Como rodar localmente
+Basta abrir o `index.html` no navegador (é preciso internet para carregar o Chart.js e a fonte).
 
----
-
-## 🚀 Como Usar
-
-### Local (Arquivo):
-1. Baixe `index.html`
-2. Abra no navegador (file:// protocol funciona)
-3. Use os filtros para explorar dados
-
-### Online:
-- **[Dashboard ao vivo](https://conceicaofrancisco645-commits.github.io/dashboard-porsche-sales/)**
-
-### Testando Filtros:
-1. **Filtro Estado = "CA":**
-   - Vendas reduzem de 76 → 11
-   - Receita: USD 9.487.000 → USD 1.364.000
-   - Taxa de Entrega: 47% → 55%
-
-2. **Botão "Limpar Filtros":**
-   - Reseta todos os filtros para "Todos"
-   - Recarrega dados completos
-
----
-
-## 📸 Screenshots
-
-### Dashboard Inicial (sem filtros)
-![Dashboard sem filtros](/dashboard-overview.png)
-*Total de Vendas: 76 | Receita: USD 9.487.000 | Ticket Médio: USD 124.825 | Taxa Entrega: 47%*
-
-### Com Filtro Aplicado (CA)
-![Dashboard com filtro CA](/dashboard-filtered-ca.png)
-*Filtro: Estado = CA | Vendas reduzem para 11 | Receita: USD 1.364.000*
-
----
-
-## 🔄 Processo Iterativo (O Que Mudou)
-
-**Iteração 1 → Iteração Final:**
-- Redução de 5 para 3 perguntas prioritárias (foco > ruído)
-- Adição de indicador "Taxa de Entrega" (KPI business-critical)
-- Refinamento de filtro "Faixa de Preço" (UX melhor que slider)
-- Validação de lógica AND para todos os filtros
-- Teste com CA para confirmar atualização de dados
-
-**Nenhum bug identificado** durante testes — dashboard pronta para produção.
-
----
-
-## 📚 Aprendizados
-
-1. **Perguntas de Negócio:** Dataless IA gera gráficos quebrados. Perguntas claras = dashboard útil.
-2. **Preparação de Dados:** Sanitização antes de enviar para IA economiza iterações (24 registros INVALID).
-3. **Filtros AND:** Mais restritivo, mas mais útil que OR para exploração.
-4. **Chart.js:** Destruir/reconstruir gráficos é mais confiável que atualizar dados inline.
-5. **GitHub Pages:** Publicação de arquivo único `.html` é trivial e gratuita.
-
----
-
-## 🎯 Próximos Passos (Ideias de Evolução)
-
-- [ ] Adicionar filtro por **Semana/Mês** (temporal analysis)
-- [ ] Exportar dados filtrados como **CSV**
-- [ ] Comparativa de **Ticket Médio por Modelo** (scatter plot)
-- [ ] Timeline de vendas (qual mês foi melhor?)
-- [ ] Usar dados crua (INVALID) e escrever segunda regra de sanitização
-- [ ] Versão **Power BI** ou **Looker** para comparação
-
----
-
-## 👨‍💻 Como Foi Feito
-
-**Ferramentas Usadas:**
-- PowerShell: Preparação e limpeza de dados
-- ChatGPT/Canvas: Geração de HTML inicial
-- VS Code: Refinamento final
-- Git/GitHub: Versionamento e publicação
-- GitHub Pages: Hosting gratuito
-
-**Tempo Estimado:** ~3-4 horas (planejamento, preparação, geração, testes, publicação)
-
----
-
-## 📝 Notas Finais
-
-Esta dashboard responde perguntas reais de negócio, não é um amontoado de gráficos. Os filtros funcionam, os indicadores atualizam, e o visual segue a identidade Porsche.
-
-**Validação:**
-- ✅ Carrega no GitHub Pages
-- ✅ Filtros dinâmicos funcionam
-- ✅ Indicadores recalculam corretamente
-- ✅ Gráficos renderizam
-- ✅ Responsivo em mobile
-- ✅ Sem dependências externas (apenas Chart.js via CDN)
-
----
-
-## 📧 Referências
-
-- **Base de dados:** [Planilha base Porsche (sanitizada)](https://hermes.dio.me/files/assets/8683bed0-cc33-4e06-bca9-04db9c31f9e2.xlsx)
-- **Desafio Original:** [DIO - Criando Agentes de Tratamento de Dados](https://www.dio.me/)
-- **Expert:** Felipe Aguiar (Felipão)
-- **Dashboard Expert:** [Exemplo oficial](https://digitalinnovationone.github.io/dashboard_porsche_sales/)
-
----
-
-**Criado com ❤️ usando IA e boa prática de engenharia de dados.**
-
-*Dashboard Porsche Sales © 2025 | HTML Interativo | Sem Limitações de Excel*
+## Ideias para evoluir
+- Trocar o filtro de cidade por um mapa por estado.
+- Escrever uma regra para recuperar as 24 datas `INVALID` a partir do dado cru.
+- Criar uma versão no estilo dos componentes do Power BI.
