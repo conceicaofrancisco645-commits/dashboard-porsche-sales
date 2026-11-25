@@ -1,426 +1,240 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Porsche Sales</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: "Segoe UI", Roboto, Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        .header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; letter-spacing: 2px; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .filters {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-        .filter-group { display: flex; flex-direction: column; }
-        .filter-group label { font-weight: 600; margin-bottom: 5px; font-size: 0.9em; }
-        .filter-group select {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn-reset {
-            padding: 10px 20px;
-            background-color: #666;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            align-self: flex-end;
-        }
-        .btn-reset:hover { background-color: #333; }
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .metric-card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            text-align: center;
-            border-left: 4px solid #1a1a1a;
-        }
-        .metric-card h3 { font-size: 0.85em; color: #666; margin-bottom: 15px; }
-        .metric-card .value { font-size: 2em; color: #1a1a1a; }
-        .charts {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        .chart-container {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-        }
-        .chart-container h2 { font-size: 1.1em; margin-bottom: 20px; }
-        .chart-wrapper { position: relative; height: 300px; }
-        .empty-message { background: white; padding: 50px; text-align: center; border-radius: 8px; color: #999; }
-        @media (max-width: 768px) {
-            .charts { grid-template-columns: 1fr; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Vendas Porsche</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0e0e10; --panel:#17171a; --panel2:#1f1f23; --line:#2a2a2f;
+    --text:#f2f2f2; --muted:#9a9aa2; --accent:#d5001c; --accent2:#c9a96e;
+    --ok:#3fae6a; --warn:#d9a43a; --bad:#d5001c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.45}
+  header{padding:28px 32px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  header h1{font-size:24px;font-weight:700;letter-spacing:.5px}
+  header h1 span{color:var(--accent)}
+  header p{color:var(--muted);margin-top:4px}
+  .badge{color:var(--muted);font-size:12px;border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+  main{padding:24px 32px 40px;max-width:1400px;margin:0 auto}
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px}
+  .filters label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+  select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;cursor:pointer}
+  select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .reset{align-self:end;background:transparent;color:var(--text);border:1px solid var(--accent);border-radius:8px;padding:9px 10px;font:inherit;font-weight:600;cursor:pointer}
+  .reset:hover{background:var(--accent)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:16px 18px}
+  .kpi .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+  .kpi .val{font-size:26px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+  .kpi .sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .card.wide{grid-column:1/-1}
+  .q{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+  .card h2{font-size:16px;font-weight:600;margin:4px 0 4px}
+  .answer{color:var(--muted);font-size:13px;margin-bottom:12px;min-height:20px}
+  .answer b{color:var(--text)}
+  .chart{position:relative;height:300px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tbl{max-height:320px;overflow:auto}
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr} header,main{padding-left:16px;padding-right:16px}}
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>PORSCHE SALES</h1>
-        <p>Dashboard Interativa de Analise de Vendas</p>
-    </div>
-    <div class="container">
-        <div class="filters">
-            <div class="filter-group">
-                <label for="filterState">Estado</label>
-                <select id="filterState" onchange="updateDashboard()">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterModel">Modelo</label>
-                <select id="filterModel" onchange="updateDashboard()">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterYear">Ano</label>
-                <select id="filterYear" onchange="updateDashboard()">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterPayment">Metodo de Pagamento</label>
-                <select id="filterPayment" onchange="updateDashboard()">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterStatus">Status de Entrega</label>
-                <select id="filterStatus" onchange="updateDashboard()">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterPrice">Faixa de Preco</label>
-                <select id="filterPrice" onchange="updateDashboard()">
-                    <option value="">Todos</option>
-                    <option value="0-50000">Ate 50 mil</option>
-                    <option value="50000-100000">50 - 100 mil</option>
-                    <option value="100000-150000">100 - 150 mil</option>
-                    <option value="150000-999999">Acima de 150 mil</option>
-                </select>
-            </div>
-            <button class="btn-reset" onclick="resetFilters()">Limpar Filtros</button>
-        </div>
-        <div class="metrics">
-            <div class="metric-card">
-                <h3>Total de Vendas</h3>
-                <div class="value" id="metricSales">0</div>
-            </div>
-            <div class="metric-card">
-                <h3>Receita Total</h3>
-                <div class="value" id="metricRevenue">USD 0</div>
-            </div>
-            <div class="metric-card">
-                <h3>Ticket Medio</h3>
-                <div class="value" id="metricAverage">USD 0</div>
-            </div>
-            <div class="metric-card">
-                <h3>Taxa de Entrega</h3>
-                <div class="value" id="metricDelivery">0%</div>
-            </div>
-        </div>
-        <div class="charts" id="chartsContainer">
-            <div class="chart-container">
-                <h2>Receita por Estado (Top 10)</h2>
-                <div class="chart-wrapper">
-                    <canvas id="chartRevenue"></canvas>
-                </div>
-            </div>
-            <div class="chart-container">
-                <h2>Distribuicao de Modelos</h2>
-                <div class="chart-wrapper">
-                    <canvas id="chartModels"></canvas>
-                </div>
-            </div>
-            <div class="chart-container">
-                <h2>Status de Entrega</h2>
-                <div class="chart-wrapper">
-                    <canvas id="chartDelivery"></canvas>
-                </div>
-            </div>
-        </div>
-        <div id="emptyMessage" class="empty-message" style="display: none;">
-            Nenhum resultado encontrado com os filtros selecionados.
-        </div>
-    </div>
-    <script>
-        // DADOS EMBUTIDOS
-        const salesData = [{"sale_id":7,"sale_date":"2024-03-14","model":"911 Turbo S","year":2024,"price":235000.0,"mileage":1200,"payment_method":"Wire Transfer","city":"Seattle","state":"WA","delivery_status":"Delivered"},{"sale_id":8,"sale_date":"2024-04-18","model":"Cayenne Coupe","year":2023,"price":112750.0,"mileage":6400,"payment_method":"Financing","city":"Austin","state":"TX","delivery_status":"In Transit"},{"sale_id":10,"sale_date":"2024-05-22","model":"Taycan 4S","year":2024,"price":121000.0,"mileage":0,"payment_method":"Bank Transfer","city":"Los Angeles","state":"CA","delivery_status":"Delivered"},{"sale_id":11,"sale_date":"2024-08-06","model":"Panamera 4","year":2023,"price":104500.0,"mileage":14500,"payment_method":"Credit Card","city":"Miami","state":"FL","delivery_status":"Cancelled"},{"sale_id":12,"sale_date":"2024-07-11","model":"911 Carrera S","year":2020,"price":96300.0,"mileage":41000,"payment_method":"Lease","city":"New York","state":"NY","delivery_status":"Delivered"},{"sale_id":14,"sale_date":"2024-08-19","model":"718 Boxster","year":2021,"price":73500.0,"mileage":22300,"payment_method":"Debit Card","city":"Chicago","state":"IL","delivery_status":"Shipped"},{"sale_id":15,"sale_date":"2024-09-02","model":"Macan GTS","year":2024,"price":95000.0,"mileage":3500,"payment_method":"Financing","city":"Phoenix","state":"AZ","delivery_status":"In Transit"},{"sale_id":16,"sale_date":"2024-09-17","model":"Taycan Turbo","year":2023,"price":153200.5,"mileage":11,"payment_method":"ACH Payment","city":"Dallas","state":"TX","delivery_status":"Delivered"},{"sale_id":18,"sale_date":"2024-05-11","model":"Panamera Turbo S","year":2022,"price":132000.0,"mileage":19250,"payment_method":"Cash","city":"San Jose","state":"CA","delivery_status":"Delivered"},{"sale_id":19,"sale_date":"2024-12-12","model":"Cayenne Turbo GT","year":2024,"price":188000.0,"mileage":2100,"payment_method":"Crypto Payment","city":"Houston","state":"TX","delivery_status":"Awaiting Delivery"},{"sale_id":20,"sale_date":"2024-12-25","model":"911 Carrera Cabriolet","year":2023,"price":127800.0,"mileage":12000,"payment_method":"Credit Card","city":"Atlanta","state":"GA","delivery_status":"Delivered"},{"sale_id":21,"sale_date":"2025-01-06","model":"Macan","year":2021,"price":58900.0,"mileage":33700,"payment_method":"Bank Transfer","city":"Orlando","state":"FL","delivery_status":"Pending"},{"sale_id":23,"sale_date":"2025-02-14","model":"Taycan Cross Turismo","year":2023,"price":118500.0,"mileage":7800,"payment_method":"Wire Transfer","city":"Charlotte","state":"NC","delivery_status":"Delivered"},{"sale_id":25,"sale_date":"2025-03-21","model":"911 Targa 4S","year":2024,"price":158750.0,"mileage":2500,"payment_method":"Lease","city":"Minneapolis","state":"MN","delivery_status":"Delivered"},{"sale_id":26,"sale_date":"2025-03-28","model":"Panamera","year":2020,"price":72000.0,"mileage":49000,"payment_method":"Bank Transfer","city":"Philadelphia","state":"PA","delivery_status":"Cancelled"},{"sale_id":27,"sale_date":"2025-04-09","model":"Macan Electric","year":2025,"price":86500.0,"mileage":0,"payment_method":"Wire Transfer","city":"San Antonio","state":"TX","delivery_status":"Delivered"},{"sale_id":29,"sale_date":"2025-05-12","model":"Taycan GTS","year":2023,"price":139000.0,"mileage":6250,"payment_method":"Financing","city":"Raleigh","state":"NC","delivery_status":"In Transit"},{"sale_id":30,"sale_date":"2025-06-18","model":"Cayenne","year":2021,"price":76800.0,"mileage":38400,"payment_method":"Credit Card","city":"Detroit","state":"MI","delivery_status":"Delivered"},{"sale_id":32,"sale_date":"2025-07-07","model":"911 Carrera GTS","year":2022,"price":119900.0,"mileage":13600,"payment_method":"Cash","city":"Indianapolis","state":"IN","delivery_status":"Delivered"},{"sale_id":33,"sale_date":"2025-07-22","model":"Panamera 4 E-Hybrid","year":2023,"price":109250.0,"mileage":8900,"payment_method":"Lease","city":"Fort Worth","state":"TX","delivery_status":"In Transit"},{"sale_id":34,"sale_date":"2025-08-14","model":"Macan T","year":2022,"price":82000.0,"mileage":21750,"payment_method":"Wire Transfer","city":"Jacksonville","state":"FL","delivery_status":"Delivered"},{"sale_id":35,"sale_date":"2025-09-01","model":"Taycan Turbo S","year":2025,"price":214000.0,"mileage":0,"payment_method":"Crypto Payment","city":"San Diego","state":"CA","delivery_status":"Pending Review"},{"sale_id":37,"sale_date":"2025-09-18","model":"Cayenne S","year":2023,"price":98200.0,"mileage":12200,"payment_method":"Bank Transfer","city":"Sacramento","state":"CA","delivery_status":"Pending"},{"sale_id":38,"sale_date":"2025-10-04","model":"Macan","year":2022,"price":67500.0,"mileage":24100,"payment_method":"Financing","city":"Cleveland","state":"OH","delivery_status":"Delivered"},{"sale_id":39,"sale_date":"2025-10-12","model":"Taycan","year":2025,"price":116900.0,"mileage":0,"payment_method":"Wire Transfer","city":"Milwaukee","state":"WI","delivery_status":"In Transit"},{"sale_id":40,"sale_date":"2025-10-29","model":"Panamera 4S","year":2024,"price":112000.0,"mileage":10,"payment_method":"Cash","city":"Kansas City","state":"MO","delivery_status":"Delivered"},{"sale_id":41,"sale_date":"2025-02-11","model":"718 Boxster","year":2021,"price":74000.0,"mileage":31000,"payment_method":"Debit Card","city":"Omaha","state":"NE","delivery_status":"Cancelled"},{"sale_id":42,"sale_date":"2025-11-16","model":"911 Turbo","year":2024,"price":198300.0,"mileage":2400,"payment_method":"Wire Transfer","city":"Albuquerque","state":"NM","delivery_status":"Awaiting Delivery"},{"sale_id":45,"sale_date":"2025-12-07","model":"Taycan 4S","year":2025,"price":129000.0,"mileage":0,"payment_method":"ACH Payment","city":"Virginia Beach","state":"VA","delivery_status":"In Transit"},{"sale_id":46,"sale_date":"2025-12-22","model":"Panamera Turbo","year":2022,"price":136000.0,"mileage":18400,"payment_method":"Credit Card","city":"Colorado Springs","state":"CO","delivery_status":"Delivered"},{"sale_id":48,"sale_date":"2026-01-08","model":"Cayenne E-Hybrid","year":2023,"price":92800.0,"mileage":15000,"payment_method":"Lease","city":"Bakersfield","state":"CA","delivery_status":"Delivered"},{"sale_id":49,"sale_date":"2026-01-15","model":"Macan T","year":2022,"price":72400.0,"mileage":19750,"payment_method":"Cash","city":"Mesa","state":"AZ","delivery_status":"Awaiting Pickup"},{"sale_id":50,"sale_date":"2026-01-28","model":"Taycan Turbo","year":2025,"price":158500.0,"mileage":3200,"payment_method":"Crypto Payment","city":"Atlanta","state":"GA","delivery_status":"Delivered"},{"sale_id":51,"sale_date":"2026-02-03","model":"718 Cayman","year":2021,"price":69900.0,"mileage":27600,"payment_method":"Bank Transfer","city":"Long Beach","state":"CA","delivery_status":"Pending"},{"sale_id":53,"sale_date":"2026-02-19","model":"Panamera","year":2020,"price":71500.0,"mileage":52000,"payment_method":"Wire Transfer","city":"Tulsa","state":"OK","delivery_status":"Delivered"},{"sale_id":54,"sale_date":"2026-02-25","model":"Cayenne Turbo","year":2023,"price":146800.0,"mileage":11300,"payment_method":"Credit Card","city":"Wichita","state":"KS","delivery_status":"Pending"},{"sale_id":55,"sale_date":"2026-03-01","model":"Macan Electric","year":2025,"price":89700.0,"mileage":0,"payment_method":"Lease","city":"New Orleans","state":"LA","delivery_status":"Delivered"},{"sale_id":56,"sale_date":"2026-03-14","model":"911 Carrera S","year":2022,"price":104600.0,"mileage":15900,"payment_method":"Bank Transfer","city":"Honolulu","state":"HI","delivery_status":"Cancelled"},{"sale_id":58,"sale_date":"2026-04-08","model":"Cayenne","year":2021,"price":78400.0,"mileage":40250,"payment_method":"Cash","city":"Henderson","state":"NV","delivery_status":"Awaiting Review"},{"sale_id":60,"sale_date":"2026-04-21","model":"911 Dakar","year":2024,"price":268900.0,"mileage":1400,"payment_method":"Credit Card","city":"Riverside","state":"CA","delivery_status":"Delivered"},{"sale_id":61,"sale_date":"2026-04-29","model":"Panamera 4","year":2023,"price":101300.0,"mileage":12700,"payment_method":"Wire Transfer","city":"Corpus Christi","state":"TX","delivery_status":"Pending"},{"sale_id":62,"sale_date":"2026-05-05","model":"Macan S","year":2021,"price":66750.0,"mileage":29800,"payment_method":"Cash","city":"St. Louis","state":"MO","delivery_status":"Delivered"},{"sale_id":63,"sale_date":"2026-05-14","model":"Taycan Cross Turismo","year":2024,"price":127900.0,"mileage":7500,"payment_method":"Lease","city":"Pittsburgh","state":"PA","delivery_status":"In Transit"},{"sale_id":64,"sale_date":"2026-05-23","model":"Cayenne Turbo GT","year":2025,"price":200000.0,"mileage":1950,"payment_method":"Wire Transfer","city":"Cincinnati","state":"OH","delivery_status":"Delivered"},{"sale_id":65,"sale_date":"2026-06-02","model":"911 Carrera Cabriolet","year":2023,"price":132000.0,"mileage":8800,"payment_method":"Crypto Payment","city":"Anchorage","state":"AK","delivery_status":"Pending Review"},{"sale_id":66,"sale_date":"2026-06-15","model":"718 Cayman GT4 RS","year":2024,"price":176400.0,"mileage":600,"payment_method":"Credit Card","city":"Plano","state":"TX","delivery_status":"Delivered"},{"sale_id":68,"sale_date":"2026-07-07","model":"Macan","year":2021,"price":59000.0,"mileage":36000,"payment_method":"Financing","city":"Greensboro","state":"NC","delivery_status":"Awaiting Delivery"},{"sale_id":69,"sale_date":"2026-07-20","model":"Taycan Turbo S","year":2025,"price":218000.0,"mileage":0,"payment_method":"Wire Transfer","city":"Lincoln","state":"NE","delivery_status":"Pending"},{"sale_id":71,"sale_date":"2026-04-08","model":"911 Carrera GTS","year":2024,"price":121750.0,"mileage":5872,"payment_method":"Credit Card","city":"Chandler","state":"AZ","delivery_status":"Delivered"},{"sale_id":72,"sale_date":"2026-08-18","model":"718 Boxster GTS","year":2023,"price":91500.0,"mileage":13300,"payment_method":"Lease","city":"Reno","state":"NV","delivery_status":"Shipped"},{"sale_id":73,"sale_date":"2026-08-31","model":"Panamera Turbo S","year":2022,"price":134000.0,"mileage":20100,"payment_method":"Wire Transfer","city":"Buffalo","state":"NY","delivery_status":"In Transit"},{"sale_id":74,"sale_date":"2026-09-09","model":"Macan GTS","year":2024,"price":96800.0,"mileage":0,"payment_method":"ACH Payment","city":"Durham","state":"NC","delivery_status":"Delivered"},{"sale_id":75,"sale_date":"2026-09-17","model":"Taycan 4S","year":2025,"price":131600.0,"mileage":2900,"payment_method":"Wire Transfer","city":"Laredo","state":"TX","delivery_status":"Pending Approval"},{"sale_id":76,"sale_date":"2026-09-28","model":"Cayenne E-Hybrid","year":2023,"price":94300.0,"mileage":13100,"payment_method":"Cash","city":"Madison","state":"WI","delivery_status":"Delivered"},{"sale_id":77,"sale_date":"2026-10-06","model":"911 Turbo S","year":2025,"price":242000.0,"mileage":1100,"payment_method":"Crypto Payment","city":"Lubbock","state":"TX","delivery_status":"Awaiting Pickup"},{"sale_id":78,"sale_date":"2026-10-16","model":"718 Cayman S","year":2022,"price":82750.0,"mileage":22500,"payment_method":"Credit Card","city":"Toledo","state":"OH","delivery_status":"Cancelled"},{"sale_id":79,"sale_date":"2026-10-29","model":"Macan Electric","year":2026,"price":91300.0,"mileage":0,"payment_method":"Wire Transfer","city":"Irvine","state":"CA","delivery_status":"Delivered"},{"sale_id":80,"sale_date":"2026-11-03","model":"Panamera","year":2021,"price":79900.0,"mileage":44800,"payment_method":"Financing","city":"Garland","state":"TX","delivery_status":"Pending"},{"sale_id":82,"sale_date":"2026-12-11","model":"911 Targa 4S","year":2023,"price":156500.0,"mileage":4200,"payment_method":"Cash","city":"Chesapeake","state":"VA","delivery_status":"Delivered"},{"sale_id":83,"sale_date":"2026-12-24","model":"Taycan","year":2025,"price":119900.0,"mileage":1250,"payment_method":"Lease","city":"Scottsdale","state":"AZ","delivery_status":"Pending"},{"sale_id":85,"sale_date":"2026-12-28","model":"911 GT3","year":2024,"price":224000.0,"mileage":3000,"payment_method":"Wire Transfer","city":"Boise","state":"ID","delivery_status":"Awaiting Delivery"},{"sale_id":86,"sale_date":"2027-01-15","model":"911 Carrera","year":2024,"price":126900.0,"mileage":7200,"payment_method":"Credit Card","city":"Orlando","state":"FL","delivery_status":"Delivered"},{"sale_id":87,"sale_date":"2027-01-29","model":"Cayenne","year":2023,"price":84500.0,"mileage":21400,"payment_method":"Bank Transfer","city":"San Jose","state":"CA","delivery_status":"Pending"},{"sale_id":88,"sale_date":"2027-02-11","model":"Macan S","year":2022,"price":69800.0,"mileage":26300,"payment_method":"Financing","city":"Tampa","state":"FL","delivery_status":"Delivered"},{"sale_id":90,"sale_date":"2027-03-05","model":"Panamera","year":2021,"price":81000.0,"mileage":42,"payment_method":"Cash","city":"Austin","state":"TX","delivery_status":"Delivered"},{"sale_id":91,"sale_date":"2027-03-18","model":"718 Cayman","year":2023,"price":78900.0,"mileage":17500,"payment_method":"Debit Card","city":"Seattle","state":"WA","delivery_status":"Cancelled"},{"sale_id":92,"sale_date":"2027-04-02","model":"911 Turbo S","year":2026,"price":249300.0,"mileage":900,"payment_method":"Wire Transfer","city":"Boston","state":"MA","delivery_status":"Awaiting Delivery"},{"sale_id":95,"sale_date":"2027-05-12","model":"Taycan Turbo","year":2025,"price":164000.0,"mileage":0,"payment_method":"ACH Payment","city":"Dallas","state":"TX","delivery_status":"In Transit"},{"sale_id":96,"sale_date":"2027-05-27","model":"Panamera 4S","year":2024,"price":119000.0,"mileage":13400,"payment_method":"Credit Card","city":"San Francisco","state":"CA","delivery_status":"Delivered"},{"sale_id":98,"sale_date":"2027-06-18","model":"Cayenne E-Hybrid","year":2023,"price":96800.0,"mileage":14000,"payment_method":"Lease","city":"Charlotte","state":"NC","delivery_status":"Delivered"},{"sale_id":99,"sale_date":"2027-07-03","model":"Macan T","year":2022,"price":74400.0,"mileage":20750,"payment_method":"Cash","city":"Mesa","state":"AZ","delivery_status":"Awaiting Pickup"},{"sale_id":100,"sale_date":"2027-07-22","model":"Taycan GTS","year":2025,"price":148500.0,"mileage":5200,"payment_method":"Crypto Payment","city":"Atlanta","state":"GA","delivery_status":"Delivered"},{"sale_id":101,"sale_date":"2027-08-08","model":"718 Boxster","year":2021,"price":71900.0,"mileage":29600,"payment_method":"Bank Transfer","city":"Long Beach","state":"CA","delivery_status":"Pending"},{"sale_id":103,"sale_date":"2027-09-19","model":"Panamera Turbo","year":2020,"price":137500.0,"mileage":48000,"payment_method":"Wire Transfer","city":"Tulsa","state":"OK","delivery_status":"Delivered"},{"sale_id":104,"sale_date":"2027-09-25","model":"Cayenne Turbo GT","year":2025,"price":204800.0,"mileage":3300,"payment_method":"Credit Card","city":"Wichita","state":"KS","delivery_status":"Pending"},{"sale_id":105,"sale_date":"2027-10-01","model":"911 Dakar","year":2024,"price":271700.0,"mileage":1050,"payment_method":"Lease","city":"New Orleans","state":"LA","delivery_status":"Delivered"}];
-        
-        let chartRevenue = null;
-        let chartModels = null;
-        let chartDelivery = null;
-        
-        // Funcao para popular dropdowns
-        function populateFilters() {
-            const states = [...new Set(salesData.map(d => d.state))].sort();
-            const models = [...new Set(salesData.map(d => d.model))].sort();
-            const years = [...new Set(salesData.map(d => d.year))].sort().reverse();
-            const payments = [...new Set(salesData.map(d => d.payment_method))].sort();
-            const statuses = [...new Set(salesData.map(d => d.delivery_status))].sort();
-            
-            const stateSelect = document.getElementById('filterState');
-            states.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s;
-                opt.text = s;
-                stateSelect.appendChild(opt);
-            });
-            
-            const modelSelect = document.getElementById('filterModel');
-            models.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m;
-                opt.text = m;
-                modelSelect.appendChild(opt);
-            });
-            
-            const yearSelect = document.getElementById('filterYear');
-            years.forEach(y => {
-                const opt = document.createElement('option');
-                opt.value = y;
-                opt.text = y;
-                yearSelect.appendChild(opt);
-            });
-            
-            const paymentSelect = document.getElementById('filterPayment');
-            payments.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p;
-                opt.text = p;
-                paymentSelect.appendChild(opt);
-            });
-            
-            const statusSelect = document.getElementById('filterStatus');
-            statuses.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s;
-                opt.text = s;
-                statusSelect.appendChild(opt);
-            });
-        }
-        
-        // Funcao para filtrar dados
-        function getFilteredData() {
-            const state = document.getElementById('filterState').value;
-            const model = document.getElementById('filterModel').value;
-            const year = document.getElementById('filterYear').value;
-            const payment = document.getElementById('filterPayment').value;
-            const status = document.getElementById('filterStatus').value;
-            const price = document.getElementById('filterPrice').value;
-            
-            return salesData.filter(d => {
-                const stateMatch = !state || d.state === state;
-                const modelMatch = !model || d.model === model;
-                const yearMatch = !year || d.year == year;
-                const paymentMatch = !payment || d.payment_method === payment;
-                const statusMatch = !status || d.delivery_status === status;
-                
-                let priceMatch = true;
-                if (price) {
-                    const [min, max] = price.split('-').map(Number);
-                    priceMatch = d.price >= min && d.price <= max;
-                }
-                
-                return stateMatch && modelMatch && yearMatch && paymentMatch && statusMatch && priceMatch;
-            });
-        }
-        
-        // Funcao para atualizar metricas
-        function updateMetrics() {
-            const data = getFilteredData();
-            const totalSales = data.length;
-            const totalRevenue = data.reduce((sum, d) => sum + d.price, 0);
-            const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
-            const delivered = data.filter(d => d.delivery_status === 'Delivered').length;
-            const deliveryRate = totalSales > 0 ? Math.round(delivered / totalSales * 100) : 0;
-            
-            document.getElementById('metricSales').textContent = totalSales;
-            document.getElementById('metricRevenue').textContent = 'USD ' + (Math.round(totalRevenue / 1000) * 1000).toLocaleString();
-            document.getElementById('metricAverage').textContent = 'USD ' + Math.round(avgTicket).toLocaleString();
-            document.getElementById('metricDelivery').textContent = deliveryRate + '%';
-        }
-        
-        // Funcao para atualizar grafico de receita por estado
-        function updateRevenueChart() {
-            const data = getFilteredData();
-            const revenueByState = {};
-            
-            data.forEach(d => {
-                if (!revenueByState[d.state]) {
-                    revenueByState[d.state] = 0;
-                }
-                revenueByState[d.state] += d.price;
-            });
-            
-            const sorted = Object.entries(revenueByState)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const labels = sorted.map(e => e[0]);
-            const values = sorted.map(e => e[1]);
-            
-            const ctx = document.getElementById('chartRevenue').getContext('2d');
-            if (chartRevenue) chartRevenue.destroy();
-            
-            chartRevenue = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Receita USD',
-                        data: values,
-                        backgroundColor: '#1a1a1a',
-                        borderColor: '#333',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { ticks: { callback: function(value) { return 'USD ' + (value/1000).toFixed(0) + 'k'; } } }
-                    }
-                }
-            });
-        }
-        
-        // Funcao para atualizar grafico de modelos
-        function updateModelsChart() {
-            const data = getFilteredData();
-            const modelCount = {};
-            
-            data.forEach(d => {
-                modelCount[d.model] = (modelCount[d.model] || 0) + 1;
-            });
-            
-            const labels = Object.keys(modelCount);
-            const values = Object.values(modelCount);
-            const colors = ['#1a1a1a', '#333', '#555', '#777', '#999', '#bbb'];
-            
-            const ctx = document.getElementById('chartModels').getContext('2d');
-            if (chartModels) chartModels.destroy();
-            
-            chartModels = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: colors.slice(0, labels.length),
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-        }
-        
-        // Funcao para atualizar grafico de status de entrega
-        function updateDeliveryChart() {
-            const data = getFilteredData();
-            const statusCount = {};
-            
-            data.forEach(d => {
-                statusCount[d.delivery_status] = (statusCount[d.delivery_status] || 0) + 1;
-            });
-            
-            const labels = Object.keys(statusCount);
-            const values = Object.values(statusCount);
-            const colors = ['#2d5016', '#4a7c2c', '#6b9f3d', '#8bb855', '#a8d26e', '#c5e599', '#ddedbc', '#e8f4d9', '#f0f8e8', '#f5fbf0'];
-            
-            const ctx = document.getElementById('chartDelivery').getContext('2d');
-            if (chartDelivery) chartDelivery.destroy();
-            
-            chartDelivery = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Quantidade',
-                        data: values,
-                        backgroundColor: colors.slice(0, labels.length),
-                        borderColor: '#fff',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
-        
-        // Funcao para atualizar dashboard
-        function updateDashboard() {
-            const data = getFilteredData();
-            
-            if (data.length === 0) {
-                document.getElementById('chartsContainer').style.display = 'none';
-                document.getElementById('emptyMessage').style.display = 'block';
-            } else {
-                document.getElementById('chartsContainer').style.display = 'grid';
-                document.getElementById('emptyMessage').style.display = 'none';
-                updateMetrics();
-                updateRevenueChart();
-                updateModelsChart();
-                updateDeliveryChart();
-            }
-        }
-        
-        // Funcao para resetar filtros
-        function resetFilters() {
-            document.getElementById('filterState').value = '';
-            document.getElementById('filterModel').value = '';
-            document.getElementById('filterYear').value = '';
-            document.getElementById('filterPayment').value = '';
-            document.getElementById('filterStatus').value = '';
-            document.getElementById('filterPrice').value = '';
-            updateDashboard();
-        }
-        
-        // Inicializar
-        window.addEventListener('load', () => {
-            populateFilters();
-            updateDashboard();
-        });
-    </script>
+<header>
+  <div>
+    <h1>Vendas <span>Porsche</span> · Dashboard</h1>
+    <p>100 vendas · base sanitizada · valores em USD</p>
+  </div>
+  <div class="badge" id="countBadge">100 de 100 vendas</div>
+</header>
+
+<main>
+  <section class="filters" aria-label="Filtros">
+    <div><label for="fLine">Linha</label><select id="fLine"></select></div>
+    <div><label for="fModel">Modelo</label><select id="fModel"></select></div>
+    <div><label for="fYear">Ano do modelo</label><select id="fYear"></select></div>
+    <div><label for="fState">Estado</label><select id="fState"></select></div>
+    <div><label for="fCity">Cidade</label><select id="fCity"></select></div>
+    <div><label for="fPay">Pagamento</label><select id="fPay"></select></div>
+    <div><label for="fStage">Situação da entrega</label><select id="fStage"></select></div>
+    <button class="reset" id="reset" type="button">Limpar filtros</button>
+  </section>
+
+  <section class="kpis">
+    <div class="kpi"><div class="lbl">Receita total</div><div class="val" id="kRev">–</div><div class="sub" id="kRevSub"></div></div>
+    <div class="kpi"><div class="lbl">Vendas</div><div class="val" id="kCount">–</div><div class="sub" id="kCountSub"></div></div>
+    <div class="kpi"><div class="lbl">Ticket médio</div><div class="val" id="kAvg">–</div><div class="sub" id="kAvgSub"></div></div>
+    <div class="kpi"><div class="lbl">Receita entregue</div><div class="val" id="kDel">–</div><div class="sub" id="kDelSub"></div></div>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <div class="q">Pergunta 1</div>
+      <h2>Qual linha de modelo traz mais receita?</h2>
+      <p class="answer" id="a1"></p>
+      <div class="chart"><canvas id="c1"></canvas></div>
+    </article>
+
+    <article class="card">
+      <div class="q">Pergunta 2</div>
+      <h2>Como os clientes pagam — e quanto dinheiro passa por cada método?</h2>
+      <p class="answer" id="a2"></p>
+      <div class="chart"><canvas id="c2"></canvas></div>
+    </article>
+
+    <article class="card">
+      <div class="q">Pergunta 3</div>
+      <h2>Quais estados concentram a receita?</h2>
+      <p class="answer" id="a3"></p>
+      <div class="chart"><canvas id="c3"></canvas></div>
+    </article>
+
+    <article class="card">
+      <div class="q">Apoio</div>
+      <h2>Quanto da receita já foi entregue?</h2>
+      <p class="answer" id="a4"></p>
+      <div class="chart"><canvas id="c4"></canvas></div>
+    </article>
+
+    <article class="card wide">
+      <div class="q">Detalhe</div>
+      <h2>Vendas no recorte atual</h2>
+      <div class="tbl"><table>
+        <thead><tr><th>ID</th><th>Data</th><th>Modelo</th><th>Ano</th><th>Cidade</th><th>UF</th><th>Pagamento</th><th>Status</th><th style="text-align:right">Preço</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table></div>
+    </article>
+  </section>
+</main>
+<footer>Base: planilha de 100 vendas tratada (colunas sanitizadas). Nomes de clientes e vendedores foram removidos antes de publicar.</footer>
+
+<script>
+const DATA = [{"id":6,"date":null,"model":"718 Cayman","line":"718","year":2022,"price":79500.0,"miles":9800,"pay":"Credit Card","city":"Boston","state":"MA","status":"Delivered","stage":"Entregue"},{"id":7,"date":"2024-03-14","model":"911 Turbo S","line":"911","year":2024,"price":235000.0,"miles":1200,"pay":"Wire Transfer","city":"Seattle","state":"WA","status":"Delivered","stage":"Entregue"},{"id":8,"date":"2024-04-18","model":"Cayenne Coupe","line":"Cayenne","year":2023,"price":112750.0,"miles":6400,"pay":"Financing","city":"Austin","state":"TX","status":"In Transit","stage":"Em andamento"},{"id":9,"date":null,"model":"Macan S","line":"Macan","year":2021,"price":68900.0,"miles":28,"pay":"Cash","city":"Denver","state":"CO","status":"Pending","stage":"Em andamento"},{"id":10,"date":"2024-05-22","model":"Taycan 4S","line":"Taycan","year":2024,"price":121000.0,"miles":0,"pay":"Bank Transfer","city":"Los Angeles","state":"CA","status":"Delivered","stage":"Entregue"},{"id":11,"date":"2024-08-06","model":"Panamera 4","line":"Panamera","year":2023,"price":104500.0,"miles":14500,"pay":"Credit Card","city":"Miami","state":"FL","status":"Cancelled","stage":"Cancelado"},{"id":12,"date":"2024-07-11","model":"911 Carrera S","line":"911","year":2020,"price":96300.0,"miles":41000,"pay":"Lease","city":"New York","state":"NY","status":"Delivered","stage":"Entregue"},{"id":13,"date":null,"model":"Cayenne E-Hybrid","line":"Cayenne","year":2022,"price":89750.0,"miles":11744,"pay":"Wire Transfer","city":"San Diego","state":"CA","status":"Pending Approval","stage":"Em andamento"},{"id":14,"date":"2024-08-19","model":"718 Boxster","line":"718","year":2021,"price":73500.0,"miles":22300,"pay":"Debit Card","city":"Chicago","state":"IL","status":"Shipped","stage":"Em andamento"},{"id":15,"date":"2024-09-02","model":"Macan GTS","line":"Macan","year":2024,"price":95000.0,"miles":3500,"pay":"Financing","city":"Phoenix","state":"AZ","status":"In Transit","stage":"Em andamento"},{"id":16,"date":"2024-09-17","model":"Taycan Turbo","line":"Taycan","year":2023,"price":153200.5,"miles":11,"pay":"ACH Payment","city":"Dallas","state":"TX","status":"Delivered","stage":"Entregue"},{"id":17,"date":null,"model":"911 GT3","line":"911","year":2024,"price":241000.0,"miles":750,"pay":"Wire Transfer","city":"Las Vegas","state":"NV","status":"Pending","stage":"Em andamento"},{"id":18,"date":"2024-05-11","model":"Panamera Turbo S","line":"Panamera","year":2022,"price":132000.0,"miles":19250,"pay":"Cash","city":"San Jose","state":"CA","status":"Delivered","stage":"Entregue"},{"id":19,"date":"2024-12-12","model":"Cayenne Turbo GT","line":"Cayenne","year":2024,"price":188000.0,"miles":2100,"pay":"Crypto Payment","city":"Houston","state":"TX","status":"Awaiting Delivery","stage":"Em andamento"},{"id":20,"date":"2024-12-25","model":"911 Carrera Cabriolet","line":"911","year":2023,"price":127800.0,"miles":12000,"pay":"Credit Card","city":"Atlanta","state":"GA","status":"Delivered","stage":"Entregue"},{"id":21,"date":"2025-01-06","model":"Macan","line":"Macan","year":2021,"price":58900.0,"miles":33700,"pay":"Bank Transfer","city":"Orlando","state":"FL","status":"Pending","stage":"Em andamento"},{"id":22,"date":null,"model":"718 Spyder RS","line":"718","year":2024,"price":164000.0,"miles":900,"pay":"Financing","city":"Portland","state":"OR","status":"In Transit","stage":"Em andamento"},{"id":23,"date":"2025-02-14","model":"Taycan Cross Turismo","line":"Taycan","year":2023,"price":118500.0,"miles":7800,"pay":"Wire Transfer","city":"Charlotte","state":"NC","status":"Delivered","stage":"Entregue"},{"id":24,"date":null,"model":"Cayenne S","line":"Cayenne","year":2022,"price":91300.0,"miles":16000,"pay":"Credit Card","city":"Nashville","state":"TN","status":"Pending","stage":"Em andamento"},{"id":25,"date":"2025-03-21","model":"911 Targa 4S","line":"911","year":2024,"price":158750.0,"miles":2500,"pay":"Lease","city":"Minneapolis","state":"MN","status":"Delivered","stage":"Entregue"},{"id":26,"date":"2025-03-28","model":"Panamera","line":"Panamera","year":2020,"price":72000.0,"miles":49000,"pay":"Bank Transfer","city":"Philadelphia","state":"PA","status":"Cancelled","stage":"Cancelado"},{"id":27,"date":"2025-04-09","model":"Macan Electric","line":"Macan","year":2025,"price":86500.0,"miles":0,"pay":"Wire Transfer","city":"San Antonio","state":"TX","status":"Delivered","stage":"Entregue"},{"id":28,"date":null,"model":"911 Dakar","line":"911","year":2024,"price":270000.0,"miles":1050,"pay":"Cash","city":"Salt Lake City","state":"UT","status":"Awaiting Pickup","stage":"Em andamento"},{"id":29,"date":"2025-05-12","model":"Taycan GTS","line":"Taycan","year":2023,"price":139000.0,"miles":6250,"pay":"Financing","city":"Raleigh","state":"NC","status":"In Transit","stage":"Em andamento"},{"id":30,"date":"2025-06-18","model":"Cayenne","line":"Cayenne","year":2021,"price":76800.0,"miles":38400,"pay":"Credit Card","city":"Detroit","state":"MI","status":"Delivered","stage":"Entregue"},{"id":31,"date":null,"model":"718 Cayman GT4 RS","line":"718","year":2024,"price":173600.0,"miles":400,"pay":"Wire Transfer","city":"Columbus","state":"OH","status":"Pending","stage":"Em andamento"},{"id":32,"date":"2025-07-07","model":"911 Carrera GTS","line":"911","year":2022,"price":119900.0,"miles":13600,"pay":"Cash","city":"Indianapolis","state":"IN","status":"Delivered","stage":"Entregue"},{"id":33,"date":"2025-07-22","model":"Panamera 4 E-Hybrid","line":"Panamera","year":2023,"price":109250.0,"miles":8900,"pay":"Lease","city":"Fort Worth","state":"TX","status":"In Transit","stage":"Em andamento"},{"id":34,"date":"2025-08-14","model":"Macan T","line":"Macan","year":2022,"price":82000.0,"miles":21750,"pay":"Wire Transfer","city":"Jacksonville","state":"FL","status":"Delivered","stage":"Entregue"},{"id":35,"date":"2025-09-01","model":"Taycan Turbo S","line":"Taycan","year":2025,"price":214000.0,"miles":0,"pay":"Crypto Payment","city":"San Diego","state":"CA","status":"Pending Review","stage":"Em andamento"},{"id":36,"date":null,"model":"911 Carrera","line":"911","year":2024,"price":124500.0,"miles":4800,"pay":"Credit Card","city":"Tampa","state":"FL","status":"Delivered","stage":"Entregue"},{"id":37,"date":"2025-09-18","model":"Cayenne S","line":"Cayenne","year":2023,"price":98200.0,"miles":12200,"pay":"Bank Transfer","city":"Sacramento","state":"CA","status":"Pending","stage":"Em andamento"},{"id":38,"date":"2025-10-04","model":"Macan","line":"Macan","year":2022,"price":67500.0,"miles":24100,"pay":"Financing","city":"Cleveland","state":"OH","status":"Delivered","stage":"Entregue"},{"id":39,"date":"2025-10-12","model":"Taycan","line":"Taycan","year":2025,"price":116900.0,"miles":0,"pay":"Wire Transfer","city":"Milwaukee","state":"WI","status":"In Transit","stage":"Em andamento"},{"id":40,"date":"2025-10-29","model":"Panamera 4S","line":"Panamera","year":2024,"price":112000.0,"miles":10,"pay":"Cash","city":"Kansas City","state":"MO","status":"Delivered","stage":"Entregue"},{"id":41,"date":"2025-02-11","model":"718 Boxster","line":"718","year":2021,"price":74000.0,"miles":31000,"pay":"Debit Card","city":"Omaha","state":"NE","status":"Cancelled","stage":"Cancelado"},{"id":42,"date":"2025-11-16","model":"911 Turbo","line":"911","year":2024,"price":198300.0,"miles":2400,"pay":"Wire Transfer","city":"Albuquerque","state":"NM","status":"Awaiting Delivery","stage":"Em andamento"},{"id":43,"date":null,"model":"Cayenne Coupe","line":"Cayenne","year":2023,"price":103750.0,"miles":6773,"pay":"Wire Transfer","city":"Tucson","state":"AZ","status":"Pending Approval","stage":"Em andamento"},{"id":44,"date":null,"model":"Macan GTS","line":"Macan","year":2024,"price":93600.0,"miles":5800,"pay":"Financing","city":"Fresno","state":"CA","status":"Shipped","stage":"Em andamento"},{"id":45,"date":"2025-12-07","model":"Taycan 4S","line":"Taycan","year":2025,"price":129000.0,"miles":0,"pay":"ACH Payment","city":"Virginia Beach","state":"VA","status":"In Transit","stage":"Em andamento"},{"id":46,"date":"2025-12-22","model":"Panamera Turbo","line":"Panamera","year":2022,"price":136000.0,"miles":18400,"pay":"Credit Card","city":"Colorado Springs","state":"CO","status":"Delivered","stage":"Entregue"},{"id":47,"date":null,"model":"911 GT3 RS","line":"911","year":2024,"price":286500.0,"miles":700,"pay":"Wire Transfer","city":"Arlington","state":"TX","status":"Pending","stage":"Em andamento"},{"id":48,"date":"2026-01-08","model":"Cayenne E-Hybrid","line":"Cayenne","year":2023,"price":92800.0,"miles":15000,"pay":"Lease","city":"Bakersfield","state":"CA","status":"Delivered","stage":"Entregue"},{"id":49,"date":"2026-01-15","model":"Macan T","line":"Macan","year":2022,"price":72400.0,"miles":19750,"pay":"Cash","city":"Mesa","state":"AZ","status":"Awaiting Pickup","stage":"Em andamento"},{"id":50,"date":"2026-01-28","model":"Taycan Turbo","line":"Taycan","year":2025,"price":158500.0,"miles":3200,"pay":"Crypto Payment","city":"Atlanta","state":"GA","status":"Delivered","stage":"Entregue"},{"id":51,"date":"2026-02-03","model":"718 Cayman","line":"718","year":2021,"price":69900.0,"miles":27600,"pay":"Bank Transfer","city":"Long Beach","state":"CA","status":"Pending","stage":"Em andamento"},{"id":52,"date":null,"model":"911 Targa 4","line":"911","year":2024,"price":141250.0,"miles":2100,"pay":"Financing","city":"Oakland","state":"CA","status":"In Transit","stage":"Em andamento"},{"id":53,"date":"2026-02-19","model":"Panamera","line":"Panamera","year":2020,"price":71500.0,"miles":52000,"pay":"Wire Transfer","city":"Tulsa","state":"OK","status":"Delivered","stage":"Entregue"},{"id":54,"date":"2026-02-25","model":"Cayenne Turbo","line":"Cayenne","year":2023,"price":146800.0,"miles":11300,"pay":"Credit Card","city":"Wichita","state":"KS","status":"Pending","stage":"Em andamento"},{"id":55,"date":"2026-03-01","model":"Macan Electric","line":"Macan","year":2025,"price":89700.0,"miles":0,"pay":"Lease","city":"New Orleans","state":"LA","status":"Delivered","stage":"Entregue"},{"id":56,"date":"2026-03-14","model":"911 Carrera S","line":"911","year":2022,"price":104600.0,"miles":15900,"pay":"Bank Transfer","city":"Honolulu","state":"HI","status":"Cancelled","stage":"Cancelado"},{"id":57,"date":null,"model":"Taycan GTS","line":"Taycan","year":2024,"price":142000.0,"miles":6600,"pay":"Wire Transfer","city":"Anaheim","state":"CA","status":"Delivered","stage":"Entregue"},{"id":58,"date":"2026-04-08","model":"Cayenne","line":"Cayenne","year":2021,"price":78400.0,"miles":40250,"pay":"Cash","city":"Henderson","state":"NV","status":"Awaiting Review","stage":"Em andamento"},{"id":59,"date":null,"model":"718 Spyder RS","line":"718","year":2025,"price":169000.0,"miles":850,"pay":"Financing","city":"Lexington","state":"KY","status":"In Transit","stage":"Em andamento"},{"id":60,"date":"2026-04-21","model":"911 Dakar","line":"911","year":2024,"price":268900.0,"miles":1400,"pay":"Credit Card","city":"Riverside","state":"CA","status":"Delivered","stage":"Entregue"},{"id":61,"date":"2026-04-29","model":"Panamera 4","line":"Panamera","year":2023,"price":101300.0,"miles":12700,"pay":"Wire Transfer","city":"Corpus Christi","state":"TX","status":"Pending","stage":"Em andamento"},{"id":62,"date":"2026-05-05","model":"Macan S","line":"Macan","year":2021,"price":66750.0,"miles":29800,"pay":"Cash","city":"St. Louis","state":"MO","status":"Delivered","stage":"Entregue"},{"id":63,"date":"2026-05-14","model":"Taycan Cross Turismo","line":"Taycan","year":2024,"price":127900.0,"miles":7500,"pay":"Lease","city":"Pittsburgh","state":"PA","status":"In Transit","stage":"Em andamento"},{"id":64,"date":"2026-05-23","model":"Cayenne Turbo GT","line":"Cayenne","year":2025,"price":200000.0,"miles":1950,"pay":"Wire Transfer","city":"Cincinnati","state":"OH","status":"Delivered","stage":"Entregue"},{"id":65,"date":"2026-06-02","model":"911 Carrera Cabriolet","line":"911","year":2023,"price":132000.0,"miles":8800,"pay":"Crypto Payment","city":"Anchorage","state":"AK","status":"Pending Review","stage":"Em andamento"},{"id":66,"date":"2026-06-15","model":"718 Cayman GT4 RS","line":"718","year":2024,"price":176400.0,"miles":600,"pay":"Credit Card","city":"Plano","state":"TX","status":"Delivered","stage":"Entregue"},{"id":67,"date":null,"model":"Panamera 4 E-Hybrid","line":"Panamera","year":2022,"price":108500.0,"miles":16200,"pay":"Bank Transfer","city":"Newark","state":"NJ","status":"Cancelled","stage":"Cancelado"},{"id":68,"date":"2026-07-07","model":"Macan","line":"Macan","year":2021,"price":59000.0,"miles":36000,"pay":"Financing","city":"Greensboro","state":"NC","status":"Awaiting Delivery","stage":"Em andamento"},{"id":69,"date":"2026-07-20","model":"Taycan Turbo S","line":"Taycan","year":2025,"price":218000.0,"miles":0,"pay":"Wire Transfer","city":"Lincoln","state":"NE","status":"Pending","stage":"Em andamento"},{"id":70,"date":null,"model":"Cayenne S","line":"Cayenne","year":2024,"price":99950.0,"miles":5300,"pay":"Debit Card","city":"Jersey City","state":"NJ","status":"Delivered","stage":"Entregue"},{"id":71,"date":"2026-04-08","model":"911 Carrera GTS","line":"911","year":2024,"price":121750.0,"miles":5872,"pay":"Credit Card","city":"Chandler","state":"AZ","status":"Delivered","stage":"Entregue"},{"id":72,"date":"2026-08-18","model":"718 Boxster GTS","line":"718","year":2023,"price":91500.0,"miles":13300,"pay":"Lease","city":"Reno","state":"NV","status":"Shipped","stage":"Em andamento"},{"id":73,"date":"2026-08-31","model":"Panamera Turbo S","line":"Panamera","year":2022,"price":134000.0,"miles":20100,"pay":"Wire Transfer","city":"Buffalo","state":"NY","status":"In Transit","stage":"Em andamento"},{"id":74,"date":"2026-09-09","model":"Macan GTS","line":"Macan","year":2024,"price":96800.0,"miles":0,"pay":"ACH Payment","city":"Durham","state":"NC","status":"Delivered","stage":"Entregue"},{"id":75,"date":"2026-09-17","model":"Taycan 4S","line":"Taycan","year":2025,"price":131600.0,"miles":2900,"pay":"Wire Transfer","city":"Laredo","state":"TX","status":"Pending Approval","stage":"Em andamento"},{"id":76,"date":"2026-09-28","model":"Cayenne E-Hybrid","line":"Cayenne","year":2023,"price":94300.0,"miles":13100,"pay":"Cash","city":"Madison","state":"WI","status":"Delivered","stage":"Entregue"},{"id":77,"date":"2026-10-06","model":"911 Turbo S","line":"911","year":2025,"price":242000.0,"miles":1100,"pay":"Crypto Payment","city":"Lubbock","state":"TX","status":"Awaiting Pickup","stage":"Em andamento"},{"id":78,"date":"2026-10-16","model":"718 Cayman S","line":"718","year":2022,"price":82750.0,"miles":22500,"pay":"Credit Card","city":"Toledo","state":"OH","status":"Cancelled","stage":"Cancelado"},{"id":79,"date":"2026-10-29","model":"Macan Electric","line":"Macan","year":2026,"price":91300.0,"miles":0,"pay":"Wire Transfer","city":"Irvine","state":"CA","status":"Delivered","stage":"Entregue"},{"id":80,"date":"2026-11-03","model":"Panamera","line":"Panamera","year":2021,"price":79900.0,"miles":44800,"pay":"Financing","city":"Garland","state":"TX","status":"Pending","stage":"Em andamento"},{"id":81,"date":null,"model":"Cayenne Coupe","line":"Cayenne","year":2024,"price":111000.0,"miles":6700,"pay":"Bank Transfer","city":"Irving","state":"TX","status":"In Transit","stage":"Em andamento"},{"id":82,"date":"2026-12-11","model":"911 Targa 4S","line":"911","year":2023,"price":156500.0,"miles":4200,"pay":"Cash","city":"Chesapeake","state":"VA","status":"Delivered","stage":"Entregue"},{"id":83,"date":"2026-12-24","model":"Taycan","line":"Taycan","year":2025,"price":119900.0,"miles":1250,"pay":"Lease","city":"Scottsdale","state":"AZ","status":"Pending","stage":"Em andamento"},{"id":84,"date":null,"model":"Macan T","line":"Macan","year":2022,"price":73200.0,"miles":18600,"pay":"Wire Transfer","city":"Norfolk","state":"VA","status":"Delivered","stage":"Entregue"},{"id":85,"date":"2026-12-28","model":"911 GT3","line":"911","year":2024,"price":224000.0,"miles":3000,"pay":"Wire Transfer","city":"Boise","state":"ID","status":"Awaiting Delivery","stage":"Em andamento"},{"id":86,"date":"2027-01-15","model":"911 Carrera","line":"911","year":2024,"price":126900.0,"miles":7200,"pay":"Credit Card","city":"Orlando","state":"FL","status":"Delivered","stage":"Entregue"},{"id":87,"date":"2027-01-29","model":"Cayenne","line":"Cayenne","year":2023,"price":84500.0,"miles":21400,"pay":"Bank Transfer","city":"San Jose","state":"CA","status":"Pending","stage":"Em andamento"},{"id":88,"date":"2027-02-11","model":"Macan S","line":"Macan","year":2022,"price":69800.0,"miles":26300,"pay":"Financing","city":"Tampa","state":"FL","status":"Delivered","stage":"Entregue"},{"id":89,"date":null,"model":"Taycan 4S","line":"Taycan","year":2025,"price":132700.0,"miles":0,"pay":"Wire Transfer","city":"Denver","state":"CO","status":"In Transit","stage":"Em andamento"},{"id":90,"date":"2027-03-05","model":"Panamera","line":"Panamera","year":2021,"price":81000.0,"miles":42,"pay":"Cash","city":"Austin","state":"TX","status":"Delivered","stage":"Entregue"},{"id":91,"date":"2027-03-18","model":"718 Cayman","line":"718","year":2023,"price":78900.0,"miles":17500,"pay":"Debit Card","city":"Seattle","state":"WA","status":"Cancelled","stage":"Cancelado"},{"id":92,"date":"2027-04-02","model":"911 Turbo S","line":"911","year":2026,"price":249300.0,"miles":900,"pay":"Wire Transfer","city":"Boston","state":"MA","status":"Awaiting Delivery","stage":"Em andamento"},{"id":93,"date":null,"model":"Cayenne Coupe","line":"Cayenne","year":2024,"price":108750.0,"miles":5530,"pay":"Wire Transfer","city":"Phoenix","state":"AZ","status":"Pending Approval","stage":"Em andamento"},{"id":94,"date":null,"model":"Macan Electric","line":"Macan","year":2026,"price":92600.0,"miles":0,"pay":"Financing","city":"Chicago","state":"IL","status":"Shipped","stage":"Em andamento"},{"id":95,"date":"2027-05-12","model":"Taycan Turbo","line":"Taycan","year":2025,"price":164000.0,"miles":0,"pay":"ACH Payment","city":"Dallas","state":"TX","status":"In Transit","stage":"Em andamento"},{"id":96,"date":"2027-05-27","model":"Panamera 4S","line":"Panamera","year":2024,"price":119000.0,"miles":13400,"pay":"Credit Card","city":"San Francisco","state":"CA","status":"Delivered","stage":"Entregue"},{"id":97,"date":null,"model":"911 GT3","line":"911","year":2026,"price":232500.0,"miles":1700,"pay":"Wire Transfer","city":"Las Vegas","state":"NV","status":"Pending","stage":"Em andamento"},{"id":98,"date":"2027-06-18","model":"Cayenne E-Hybrid","line":"Cayenne","year":2023,"price":96800.0,"miles":14000,"pay":"Lease","city":"Charlotte","state":"NC","status":"Delivered","stage":"Entregue"},{"id":99,"date":"2027-07-03","model":"Macan T","line":"Macan","year":2022,"price":74400.0,"miles":20750,"pay":"Cash","city":"Mesa","state":"AZ","status":"Awaiting Pickup","stage":"Em andamento"},{"id":100,"date":"2027-07-22","model":"Taycan GTS","line":"Taycan","year":2025,"price":148500.0,"miles":5200,"pay":"Crypto Payment","city":"Atlanta","state":"GA","status":"Delivered","stage":"Entregue"},{"id":101,"date":"2027-08-08","model":"718 Boxster","line":"718","year":2021,"price":71900.0,"miles":29600,"pay":"Bank Transfer","city":"Long Beach","state":"CA","status":"Pending","stage":"Em andamento"},{"id":102,"date":null,"model":"911 Targa 4","line":"911","year":2024,"price":143250.0,"miles":3100,"pay":"Financing","city":"Oakland","state":"CA","status":"In Transit","stage":"Em andamento"},{"id":103,"date":"2027-09-19","model":"Panamera Turbo","line":"Panamera","year":2020,"price":137500.0,"miles":48000,"pay":"Wire Transfer","city":"Tulsa","state":"OK","status":"Delivered","stage":"Entregue"},{"id":104,"date":"2027-09-25","model":"Cayenne Turbo GT","line":"Cayenne","year":2025,"price":204800.0,"miles":3300,"pay":"Credit Card","city":"Wichita","state":"KS","status":"Pending","stage":"Em andamento"},{"id":105,"date":"2027-10-01","model":"911 Dakar","line":"911","year":2024,"price":271700.0,"miles":1050,"pay":"Lease","city":"New Orleans","state":"LA","status":"Delivered","stage":"Entregue"}];
+
+const usd = v => v.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+const usdK = v => v>=1e6 ? '$'+(v/1e6).toFixed(2)+'M' : '$'+Math.round(v/1e3)+'k';
+const pct = (a,b) => b ? (100*a/b).toFixed(0)+'%' : '0%';
+const STAGE_COLORS = {'Entregue':'#3fae6a','Em andamento':'#d9a43a','Cancelado':'#d5001c'};
+
+const filters = {
+  fLine:  {key:'line',  label:'Todas'},
+  fModel: {key:'model', label:'Todos'},
+  fYear:  {key:'year',  label:'Todos'},
+  fState: {key:'state', label:'Todos'},
+  fCity:  {key:'city',  label:'Todas'},
+  fPay:   {key:'pay',   label:'Todos'},
+  fStage: {key:'stage', label:'Todas'}
+};
+
+function fillSelect(id, rows){
+  const el = document.getElementById(id), f = filters[id], cur = el.value;
+  const vals = [...new Set(rows.map(r=>r[f.key]))].sort((a,b)=> typeof a==='number'? b-a : String(a).localeCompare(String(b)));
+  el.innerHTML = `<option value="">${f.label}</option>` + vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+  el.value = vals.map(String).includes(cur) ? cur : '';
+}
+
+function current(except){
+  return DATA.filter(r => Object.entries(filters).every(([id,f])=>{
+    if(id===except) return true;
+    const v = document.getElementById(id).value;
+    return !v || String(r[f.key])===v;
+  }));
+}
+
+// Opções dependentes: cada lista só mostra valores possíveis com os outros filtros aplicados
+function refreshOptions(){ Object.keys(filters).forEach(id=>fillSelect(id, current(id))); }
+
+function sumBy(rows, key){
+  const m = {};
+  rows.forEach(r=>{ m[r[key]] ??= {rev:0,n:0}; m[r[key]].rev+=r.price; m[r[key]].n++; });
+  return Object.entries(m).map(([k,v])=>({k,...v})).sort((a,b)=>b.rev-a.rev);
+}
+
+Chart.defaults.color = '#9a9aa2';
+Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+Chart.defaults.borderColor = '#2a2a2f';
+const charts = {};
+function draw(id, cfg){ if(charts[id]) charts[id].destroy(); charts[id] = new Chart(document.getElementById(id), cfg); }
+const moneyAxis = {ticks:{callback:v=>usdK(v)}};
+const tipMoney = {callbacks:{label:c=>' '+usd(c.parsed.x ?? c.parsed.y ?? c.parsed)}};
+
+function render(){
+  refreshOptions();
+  const rows = current();
+  const total = rows.reduce((s,r)=>s+r.price,0);
+  const n = rows.length;
+  const delivered = rows.filter(r=>r.stage==='Entregue');
+  const delRev = delivered.reduce((s,r)=>s+r.price,0);
+  const cancelled = rows.filter(r=>r.stage==='Cancelado').reduce((s,r)=>s+r.price,0);
+
+  document.getElementById('countBadge').textContent = `${n} de ${DATA.length} vendas`;
+  document.getElementById('kRev').textContent = usd(total);
+  document.getElementById('kRevSub').textContent = pct(total, DATA.reduce((s,r)=>s+r.price,0)) + ' da receita da base';
+  document.getElementById('kCount').textContent = n;
+  document.getElementById('kCountSub').textContent = `${new Set(rows.map(r=>r.model)).size} modelos · ${new Set(rows.map(r=>r.state)).size} estados`;
+  document.getElementById('kAvg').textContent = n ? usd(total/n) : '–';
+  const prices = rows.map(r=>r.price).sort((a,b)=>a-b);
+  document.getElementById('kAvgSub').textContent = n ? `de ${usdK(prices[0])} a ${usdK(prices[n-1])}` : '';
+  document.getElementById('kDel').textContent = usd(delRev);
+  document.getElementById('kDelSub').textContent = `${pct(delRev,total)} da receita · ${delivered.length} vendas`;
+
+  if(!n){
+    ['a1','a2','a3','a4'].forEach(id=>document.getElementById(id).textContent='Nenhuma venda neste recorte.');
+    Object.values(charts).forEach(c=>c.destroy());
+    Object.keys(charts).forEach(k=>delete charts[k]);
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="9" class="empty">Nenhuma venda com esses filtros.</td></tr>';
+    return;
+  }
+
+  // P1 — receita por linha
+  const byLine = sumBy(rows,'line');
+  document.getElementById('a1').innerHTML = `<b>${byLine[0].k}</b> lidera com <b>${usd(byLine[0].rev)}</b> (${pct(byLine[0].rev,total)} da receita, ${byLine[0].n} vendas).`;
+  draw('c1',{type:'bar',data:{labels:byLine.map(x=>x.k),datasets:[{data:byLine.map(x=>x.rev),backgroundColor:byLine.map((_,i)=>i===0?'#d5001c':'#4a4a52'),borderRadius:6}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${usd(c.parsed.x)} · ${byLine[c.dataIndex].n} vendas`}}},scales:{x:moneyAxis,y:{grid:{display:false}}}}});
+
+  // P2 — pagamento: receita (barras) e quantidade (linha)
+  const byPay = sumBy(rows,'pay');
+  const topN = [...byPay].sort((a,b)=>b.n-a.n)[0];
+  document.getElementById('a2').innerHTML = `<b>${byPay[0].k}</b> movimenta mais dinheiro (${usd(byPay[0].rev)}); o método mais usado é <b>${topN.k}</b> (${topN.n} vendas).`;
+  draw('c2',{type:'bar',data:{labels:byPay.map(x=>x.k),datasets:[
+      {label:'Receita',data:byPay.map(x=>x.rev),backgroundColor:'#c9a96e',borderRadius:6,yAxisID:'y'},
+      {label:'Vendas',type:'line',data:byPay.map(x=>x.n),borderColor:'#d5001c',backgroundColor:'#d5001c',pointRadius:4,yAxisID:'y1'}]},
+    options:{maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y'?` Receita: ${usd(c.parsed.y)}`:` Vendas: ${c.parsed.y}`}}},
+      scales:{y:{...moneyAxis,position:'left'},y1:{position:'right',grid:{display:false},ticks:{precision:0}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0}}}}});
+
+  // P3 — top estados
+  const byState = sumBy(rows,'state');
+  const top = byState.slice(0,10);
+  const top3 = byState.slice(0,3).reduce((s,x)=>s+x.rev,0);
+  document.getElementById('a3').innerHTML = `<b>${byState.slice(0,3).map(x=>x.k).join(', ')}</b> somam <b>${pct(top3,total)}</b> da receita do recorte.${byState.length>10?' (10 maiores estados)':''}`;
+  draw('c3',{type:'bar',data:{labels:top.map(x=>x.k),datasets:[{data:top.map(x=>x.rev),backgroundColor:top.map((_,i)=>i<3?'#d5001c':'#4a4a52'),borderRadius:6}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${usd(c.parsed.y)} · ${top[c.dataIndex].n} vendas`}}},scales:{y:moneyAxis,x:{grid:{display:false}}}}});
+
+  // Apoio — situação de entrega
+  const stages = ['Entregue','Em andamento','Cancelado'].map(s=>({k:s,rev:rows.filter(r=>r.stage===s).reduce((a,r)=>a+r.price,0)})).filter(x=>x.rev>0);
+  document.getElementById('a4').innerHTML = `<b>${pct(delRev,total)}</b> já entregue; <b>${usd(cancelled)}</b> em vendas canceladas.`;
+  draw('c4',{type:'doughnut',data:{labels:stages.map(x=>x.k),datasets:[{data:stages.map(x=>x.rev),backgroundColor:stages.map(x=>STAGE_COLORS[x.k]),borderColor:'#17171a',borderWidth:3}]},
+    options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right'},tooltip:{callbacks:{label:c=>` ${c.label}: ${usd(c.parsed)} (${pct(c.parsed,total)})`}}}}});
+
+  // Tabela
+  document.getElementById('tbody').innerHTML = [...rows].sort((a,b)=>b.price-a.price).map(r=>
+    `<tr><td>${r.id}</td><td>${r.date ?? '<span style="color:#9a9aa2">inválida</span>'}</td><td>${r.model}</td><td>${r.year}</td><td>${r.city}</td><td>${r.state}</td><td>${r.pay}</td><td>${r.status}</td><td class="num">${usd(r.price)}</td></tr>`).join('');
+}
+
+Object.keys(filters).forEach(id=>document.getElementById(id).addEventListener('change',render));
+document.getElementById('reset').addEventListener('click',()=>{ Object.keys(filters).forEach(id=>document.getElementById(id).value=''); render(); });
+render();
+</script>
 </body>
 </html>
