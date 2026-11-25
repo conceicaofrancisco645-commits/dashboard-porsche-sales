@@ -1,0 +1,56 @@
+# 🔐 Instrução de Autenticação Git para Push
+
+## Para completar o push do seu repositório:
+
+Abra **PowerShell** ou **Git Bash** e execute:
+
+```powershell
+cd "C:\Users\francisco santos\Desktop\Noticia"
+git push -u origin main
+```
+
+## Quando pedir credenciais:
+
+**Username:** `conceicaofrancisco645-commits`
+
+**Password:** Você tem 3 opções:
+
+### Opção 1: Personal Access Token (Recomendado ⭐)
+1. Acesse: https://github.com/settings/tokens
+2. Clique: "Generate new token" → "Generate new token (classic)"
+3. Configure:
+   - Name: `git-push-windows`
+   - Expiration: `90 days`
+   - Scopes: ✓ `repo` (full control)
+4. Click: "Generate token"
+5. **Copie o token inteiro** (nunca aparece novamente!)
+6. Cole como password no terminal
+
+### Opção 2: GitHub CLI (Automático)
+Se tiver GitHub CLI instalado:
+```powershell
+gh auth login
+# Responda as perguntas
+# Depois: git push -u origin main
+```
+
+### Opção 3: Git Credential Manager
+Windows já pode ter "Git Credential Manager":
+- Apenas abra o navegador quando pedir
+- Faça login no GitHub
+- Pronto!
+
+---
+
+## Depois do Push:
+
+1. Aguarde o GitHub processar
+2. Vá a: https://github.com/conceicaofrancisco645-commits/dashboard-porsche-sales/settings/pages
+3. Escolha: `Deploy from a branch` → `main` / `/ (root)`
+4. Clique: Save
+5. Aguarde ~1 minuto
+6. Acesse: https://conceicaofrancisco645-commits.github.io/dashboard-porsche-sales/
+
+---
+
+**Aviso:** O token é secreto! Não compartilhe. Se vazar, delete em Settings > Tokens.
